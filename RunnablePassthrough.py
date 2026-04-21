@@ -19,11 +19,19 @@ explain_prompt = ChatPromptTemplate.from_messages([
   ("human", "Explain the following code in simple words:\n {code} ")
 ])
 
-sequence = code_prompt | model | parser | explain_prompt | model | parser
+sequence = code_prompt | model | parser
 
-result = sequence.invoke({"topic" : "Write a code for printing even numbers in Python"})
+sequence2 = RunnableParallel({
+  "code": RunnablePassthrough(),
+  "explaination": explain_prompt | model | parser
+})
 
-print(result)
+chain = sequence | sequence2
+
+result = chain.invoke({"topic" : "Write a code for prime numebers in python"})
+
+print(result["code"])
+print(result["explaination"])
 
 # The result gives us the explaination but we are never able to see what code it has generated after we pass the sequence from code_prompt -> model -> parser...
 
